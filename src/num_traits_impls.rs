@@ -1,4 +1,4 @@
-use num_traits::{ConstOne, ConstZero, One, Zero};
+use num_traits::{One, Zero};
 
 use crate::*;
 
@@ -10,9 +10,6 @@ macro_rules! impl_num_traits {
             }
         }
 
-        impl ConstOne for $type {
-            const ONE: Self = <$type>::new(1);
-        }
 
         impl Zero for $type {
             fn zero() -> Self {
@@ -24,9 +21,6 @@ macro_rules! impl_num_traits {
             }
         }
 
-        impl ConstZero for $type {
-            const ZERO: Self = <$type>::new(0);
-        }
         impl_num_traits!($($rest),*);
     };
     () => {}
