@@ -128,7 +128,7 @@ macro_rules! implement_common {
             /// ```
             /// use ux::*;
             ///
-            /// assert_eq!(i5::min().wrapping_sub(i5::new(1)), i5::MAX);
+            /// assert_eq!(i5::MAX.wrapping_sub(i5::new(1)), i5::MAX);
             ///
             /// assert_eq!(i5::new(-10).wrapping_sub(i5::new(5)), i5::new(-15));
             /// assert_eq!(i5::new(-15).wrapping_sub(i5::new(5)), i5::new(12));
@@ -147,7 +147,7 @@ macro_rules! implement_common {
             /// ```
             /// use ux::*;
             ///
-            /// assert_eq!(i5::max().wrapping_add(i5::new(1)), i5::MIN);
+            /// assert_eq!(i5::MAX.wrapping_add(i5::new(1)), i5::MIN);
             ///
             /// assert_eq!(i5::new(10).wrapping_add(i5::new(5)), i5::new(15));
             /// assert_eq!(i5::new(15).wrapping_add(i5::new(5)), i5::new(-12));
