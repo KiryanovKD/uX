@@ -27,10 +27,6 @@ use lib::core::ops::{
     ShrAssign,
 };
 
-use lib::core::hash::{Hash, Hasher};
-
-use lib::core::cmp::{Ord, Ordering, PartialOrd};
-
 use lib::core::fmt::{Binary, Display, Formatter, LowerHex, Octal, UpperHex};
 
 macro_rules! define_unsigned {
@@ -39,7 +35,7 @@ macro_rules! define_unsigned {
 
        #[$doc]
         #[allow(non_camel_case_types)]
-        #[derive(Default, Clone, Copy, Debug)]
+        #[derive(Default, Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
         pub struct $name($type);
 
         impl $name {
@@ -63,7 +59,7 @@ macro_rules! define_signed {
 
         #[$doc]
         #[allow(non_camel_case_types)]
-        #[derive(Default, Clone, Copy, Debug)]
+        #[derive(Default, Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
         pub struct $name($type);
 
         #[$doc]
@@ -132,7 +128,7 @@ macro_rules! implement_common {
             /// ```
             /// use ux::*;
             ///
-            /// assert_eq!(i5::MIN.wrapping_sub(i5::new(1)), i5::MAX);
+            /// assert_eq!(i5::min().wrapping_sub(i5::new(1)), i5::MAX);
             ///
             /// assert_eq!(i5::new(-10).wrapping_sub(i5::new(5)), i5::new(-15));
             /// assert_eq!(i5::new(-15).wrapping_sub(i5::new(5)), i5::new(12));
@@ -151,39 +147,13 @@ macro_rules! implement_common {
             /// ```
             /// use ux::*;
             ///
-            /// assert_eq!(i5::MAX.wrapping_add(i5::new(1)), i5::MIN);
+            /// assert_eq!(i5::max().wrapping_add(i5::new(1)), i5::MIN);
             ///
             /// assert_eq!(i5::new(10).wrapping_add(i5::new(5)), i5::new(15));
             /// assert_eq!(i5::new(15).wrapping_add(i5::new(5)), i5::new(-12));
             /// ```
             pub fn wrapping_add(self, rhs: Self) -> Self {
                 $name(self.0.wrapping_add(rhs.0)).mask()
-            }
-        }
-
-        impl PartialEq for $name {
-            fn eq(&self, other: &Self) -> bool {
-                self.0 == other.0
-            }
-        }
-
-        impl Eq for $name {}
-
-        impl PartialOrd for $name {
-            fn partial_cmp(&self, other: &$name) -> Option<Ordering> {
-                Some(self.cmp(other))
-            }
-        }
-
-        impl Ord for $name {
-            fn cmp(&self, other: &$name) -> Ordering {
-                self.0.cmp(&other.0)
-            }
-        }
-
-        impl Hash for $name {
-            fn hash<H: Hasher>(&self, h: &mut H) {
-                self.0.hash(h)
             }
         }
 
@@ -1001,5 +971,18 @@ mod tests {
     fn test_mul() {
         assert_eq!(u1(1) * u1(1), u1(1));
         assert_eq!(u7(63) * u7(2), u7(126));
+    }
+
+    #[test]
+    fn test_match() {
+        const SEVEN: u7 = u7::new(7);
+        match u7(7) {
+            SEVEN => (),
+            _ => panic!("Pattern matching failed (7 != 7?)"),
+        }
+        match u7(42) {
+            SEVEN => panic!("Pattern matching failed (7 == 42?)"),
+            _ => (),
+        }
     }
 }
