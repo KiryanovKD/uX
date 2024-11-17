@@ -18,7 +18,7 @@ mod lib {
     pub use core;
 }
 
-mod conversion;
+pub mod conversion;
 #[cfg(feature = "num-traits")]
 pub mod num_traits_impls;
 
@@ -392,6 +392,19 @@ macro_rules! implement_common {
             fn mul(self, rhs: $name) -> Self::Output {
                 match self.0 * rhs.0 {
                     v if v > Self::MAX.0 => panic!("attempt to multiply with overflow"),
+                    v if v < Self::MIN.0 => panic!("attempt to multiply with underflow"),
+                    v => $name(v).mask(),
+                }
+            }
+        }
+
+        impl lib::core::ops::Div<$name> for $name {
+            type Output = $name;
+
+            fn div(self, rhs: $name) -> Self::Output {
+                match self.0 / rhs.0 {
+                    v if v > Self::MAX.0 => panic!("attempt to divide with overflow"),
+                    v if v < Self::MIN.0 => panic!("attempt to divide with underflow"),
                     v => $name(v).mask(),
                 }
             }
@@ -971,6 +984,12 @@ mod tests {
     fn test_mul() {
         assert_eq!(u1(1) * u1(1), u1(1));
         assert_eq!(u7(63) * u7(2), u7(126));
+    }
+
+     #[test]
+    fn test_div() {
+        assert_eq!(u1(1) / u1(1), u1(1));
+        assert_eq!(u7(70) * u7(2), u7(35));
     }
 
     #[test]
