@@ -19,6 +19,8 @@ mod lib {
 }
 
 mod conversion;
+#[cfg(feature = "num-traits")]
+pub mod num_traits_impls;
 
 use lib::core::ops::{
     BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor, BitXorAssign, Not, Shl, ShlAssign, Shr,
@@ -126,7 +128,7 @@ macro_rules! implement_common {
             /// ```
             /// use ux::*;
             ///
-            /// assert_eq!(i5::MIN.wrapping_sub(i5::new(1)), i5::MAX);
+            /// assert_eq!(i5::MAX.wrapping_sub(i5::new(1)), i5::MAX);
             ///
             /// assert_eq!(i5::new(-10).wrapping_sub(i5::new(5)), i5::new(-15));
             /// assert_eq!(i5::new(-15).wrapping_sub(i5::new(5)), i5::new(12));
@@ -381,6 +383,17 @@ macro_rules! implement_common {
                     debug_assert!(Self::MIN.0 + other.0 <= self.0);
                 }
                 self.wrapping_sub(other)
+            }
+        }
+
+        impl lib::core::ops::Mul<$name> for $name {
+            type Output = $name;
+
+            fn mul(self, rhs: $name) -> Self::Output {
+                match self.0 * rhs.0 {
+                    v if v > Self::MAX.0 => panic!("attempt to multiply with overflow"),
+                    v => $name(v).mask(),
+                }
             }
         }
     };
@@ -952,6 +965,12 @@ mod tests {
         assert_eq!(!u7(0x7F), u7(0));
         assert_eq!(!u7(0), u7(0x7F));
         assert_eq!(!u7(56), u7(71));
+    }
+
+    #[test]
+    fn test_mul() {
+        assert_eq!(u1(1) * u1(1), u1(1));
+        assert_eq!(u7(63) * u7(2), u7(126));
     }
 
     #[test]
